@@ -1,0 +1,149 @@
+@startuml 应用架构视图
+!theme plain
+skinparam componentStyle rectangle
+skinparam linetype ortho
+
+title TOGAF 应用架构视图 - Deno项目
+
+package "CLI应用层 (cli/)" {
+  [命令行接口] as CLI
+  [参数解析器] as ArgsParser
+  [工具集] as Tools
+  [模块加载器] as ModuleLoader
+  [类型检查器] as TypeChecker
+  [LSP服务器] as LSPServer
+  [文件获取器] as FileFetcher
+  [解析器] as Resolver
+  [注册表客户端] as RegistryClient
+}
+
+package "运行时层 (runtime/)" {
+  [JavaScript运行时] as JSRuntime
+  [Worker管理] as WorkerManager
+  [权限系统] as PermissionSystem
+  [代码缓存] as CodeCache
+  [快照系统] as SnapshotSystem
+  [错误格式化] as ErrorFormatter
+}
+
+package "扩展层 (ext/)" {
+  [Fetch API] as FetchExt
+  [WebSocket] as WebSocketExt
+  [WebGPU] as WebGPUExt
+  [Canvas] as CanvasExt
+  [WebStorage] as WebStorageExt
+  [文件系统] as FSExt
+  [网络] as NetExt
+  [HTTP] as HTTPExt
+  [加密] as CryptoExt
+  [进程] as ProcessExt
+  [信号] as SignalsExt
+  [Node.js API] as NodeExt
+  [NAPI] as NAPIExt
+  [KV存储] as KVExt
+  [定时任务] as CronExt
+  [FFI] as FFIExt
+}
+
+package "共享库层 (libs/)" {
+  [配置管理] as ConfigLib
+  [Node解析器] as NodeResolver
+  [NPM缓存] as NPMCache
+  [NPM安装器] as NPMInstaller
+  [包JSON] as PackageJSON
+  [解析器库] as ResolverLib
+}
+
+package "工具应用" {
+  [格式化工具] as FmtTool
+  [代码检查工具] as LintTool
+  [测试工具] as TestTool
+  [构建工具] as BuildTool
+  [文档工具] as DocTool
+  [包管理工具] as PMTool
+}
+
+' CLI层内部关系
+CLI --> ArgsParser
+CLI --> Tools
+CLI --> ModuleLoader
+CLI --> TypeChecker
+CLI --> LSPServer
+ModuleLoader --> FileFetcher
+ModuleLoader --> Resolver
+Resolver --> RegistryClient
+
+' CLI到运行时层
+CLI --> JSRuntime
+ModuleLoader --> JSRuntime
+TypeChecker --> JSRuntime
+
+' 运行时层内部关系
+JSRuntime --> WorkerManager
+JSRuntime --> PermissionSystem
+JSRuntime --> CodeCache
+JSRuntime --> SnapshotSystem
+JSRuntime --> ErrorFormatter
+
+' 运行时到扩展层
+JSRuntime --> FetchExt
+JSRuntime --> WebSocketExt
+JSRuntime --> WebGPUExt
+JSRuntime --> CanvasExt
+JSRuntime --> WebStorageExt
+JSRuntime --> FSExt
+JSRuntime --> NetExt
+JSRuntime --> HTTPExt
+JSRuntime --> CryptoExt
+JSRuntime --> ProcessExt
+JSRuntime --> SignalsExt
+JSRuntime --> NodeExt
+JSRuntime --> NAPIExt
+JSRuntime --> KVExt
+JSRuntime --> CronExt
+JSRuntime --> FFIExt
+
+' 扩展层到共享库
+NodeExt --> NodeResolver
+NodeExt --> NPMCache
+NodeExt --> NPMInstaller
+NodeExt --> PackageJSON
+Resolver --> ResolverLib
+ModuleLoader --> ConfigLib
+
+' 工具到其他层
+FmtTool --> JSRuntime
+LintTool --> JSRuntime
+TestTool --> JSRuntime
+BuildTool --> JSRuntime
+DocTool --> JSRuntime
+PMTool --> RegistryClient
+PMTool --> NPMInstaller
+
+note right of CLI
+  入口点：cli/main.rs
+  处理所有命令行命令
+end note
+
+note right of JSRuntime
+  核心运行时：runtime/worker.rs
+  管理JavaScript执行上下文
+end note
+
+note right of ModuleLoader
+  模块加载：cli/module_loader.rs
+  处理ESM模块解析和加载
+end note
+
+note right of PermissionSystem
+  权限控制：runtime/permissions/
+  细粒度的安全权限管理
+end note
+
+note right of FetchExt
+  所有扩展位于ext/目录
+  通过Ops机制暴露给JavaScript
+end note
+
+@enduml
+

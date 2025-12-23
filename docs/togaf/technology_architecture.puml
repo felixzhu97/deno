@@ -1,0 +1,150 @@
+@startuml 技术架构视图
+!theme plain
+skinparam componentStyle rectangle
+skinparam linetype ortho
+
+title TOGAF 技术架构视图 - Deno项目
+
+package "应用技术层" {
+  [Deno CLI] as DenoCLI
+  [Deno Runtime] as DenoRuntime
+  [扩展系统] as ExtensionSystem
+}
+
+package "运行时技术层" {
+  [V8 JavaScript引擎] as V8Engine
+  [Rust运行时] as RustRuntime
+  [Tokio异步运行时] as TokioRuntime
+  [deno_core] as DenoCore
+}
+
+package "系统接口层" {
+  [文件系统API] as FSAPI
+  [网络API] as NetworkAPI
+  [进程API] as ProcessAPI
+  [信号处理] as SignalHandling
+  [权限系统] as PermissionSystem
+  [沙箱机制] as Sandbox
+  [资源隔离] as ResourceIsolation
+}
+
+package "平台技术层" {
+  [Rust编译器] as RustCompiler
+  [Cargo构建系统] as CargoBuild
+  [LLVM后端] as LLVMBackend
+  [HTTP客户端] as HTTPClient
+  [WebSocket] as WebSocketTech
+  [TLS/SSL] as TLSTech
+  [DNS解析] as DNSResolver
+  [SQLite] as SQLiteTech
+  [文件系统] as FileSystemTech
+  [内存管理] as MemoryManagement
+}
+
+package "基础设施层" {
+  [操作系统] as OperatingSystem
+  [Linux] as Linux
+  [macOS] as macOS
+  [Windows] as Windows
+  [硬件平台] as HardwarePlatform
+  [x86_64] as x86_64
+  [ARM64] as ARM64
+}
+
+' 应用技术层到运行时技术层
+DenoCLI --> DenoRuntime
+DenoRuntime --> ExtensionSystem
+DenoRuntime --> V8Engine
+DenoRuntime --> RustRuntime
+RustRuntime --> TokioRuntime
+ExtensionSystem --> DenoCore
+DenoCore --> V8Engine
+
+' 运行时技术层到系统接口层
+V8Engine --> FSAPI
+V8Engine --> NetworkAPI
+V8Engine --> ProcessAPI
+TokioRuntime --> FSAPI
+TokioRuntime --> NetworkAPI
+TokioRuntime --> ProcessAPI
+ExtensionSystem --> PermissionSystem
+ExtensionSystem --> Sandbox
+ExtensionSystem --> ResourceIsolation
+
+' 系统接口层到平台技术层
+FSAPI --> FileSystemTech
+NetworkAPI --> HTTPClient
+NetworkAPI --> WebSocketTech
+NetworkAPI --> TLSTech
+NetworkAPI --> DNSResolver
+PermissionSystem --> ResourceIsolation
+
+' 平台技术层到基础设施层
+RustCompiler --> OperatingSystem
+CargoBuild --> OperatingSystem
+FileSystemTech --> OperatingSystem
+HTTPClient --> OperatingSystem
+WebSocketTech --> OperatingSystem
+TLSTech --> OperatingSystem
+SQLiteTech --> OperatingSystem
+
+' 操作系统到硬件平台
+OperatingSystem --> Linux
+OperatingSystem --> macOS
+OperatingSystem --> Windows
+HardwarePlatform --> x86_64
+HardwarePlatform --> ARM64
+Linux --> HardwarePlatform
+macOS --> HardwarePlatform
+Windows --> HardwarePlatform
+
+' 编译工具链关系
+RustCompiler --> CargoBuild
+CargoBuild --> LLVMBackend
+LLVMBackend --> HardwarePlatform
+
+note right of V8Engine
+  Google V8 JavaScript引擎
+  负责JavaScript/TypeScript代码执行
+  支持ESM、Web标准API
+end note
+
+note right of RustRuntime
+  Rust语言实现的核心运行时
+  提供类型安全和内存安全
+  高性能系统编程
+end note
+
+note right of TokioRuntime
+  异步I/O运行时
+  基于事件循环
+  支持并发和异步操作
+end note
+
+note right of ExtensionSystem
+  Ops机制：Rust函数暴露给JavaScript
+  扩展位于ext/目录
+  通过deno_core注册
+end note
+
+note right of PermissionSystem
+  细粒度权限控制
+  支持文件、网络、环境等权限
+  默认拒绝，显式授权
+end note
+
+note right of DenoCore
+  deno_core crate
+  提供V8绑定和扩展机制
+  模块加载和资源管理
+end note
+
+note right of OperatingSystem
+  跨平台支持：
+  - Linux (多种发行版)
+  - macOS (Intel & Apple Silicon)
+  - Windows (10+)
+end note
+
+@enduml
+

@@ -1,0 +1,89 @@
+@startuml 业务架构视图
+!theme plain
+skinparam componentStyle rectangle
+skinparam linetype ortho
+
+title TOGAF 业务架构视图 - Deno项目
+
+package "业务能力层" {
+  [JavaScript/TypeScript运行时能力] as RuntimeCapability
+  [开发者工具能力] as DevToolsCapability
+  [包管理能力] as PackageMgmtCapability
+  [语言服务能力] as LSPCapability
+}
+
+package "业务流程层" {
+  [代码执行流程] as CodeExecutionFlow
+  [模块加载流程] as ModuleLoadFlow
+  [工具链流程] as ToolchainFlow
+  [测试流程] as TestFlow
+  [构建流程] as BuildFlow
+}
+
+package "业务服务层" {
+  [CLI服务] as CLIService
+  [LSP服务] as LSPService
+  [测试服务] as TestService
+  [构建服务] as BuildService
+  [格式化服务] as FormatService
+  [代码检查服务] as LintService
+}
+
+package "外部利益相关者" {
+  [开发者] as Developer
+  [IDE/编辑器] as IDE
+  [CI/CD系统] as CICD
+}
+
+' 业务能力到流程的映射
+RuntimeCapability --> CodeExecutionFlow
+RuntimeCapability --> ModuleLoadFlow
+DevToolsCapability --> ToolchainFlow
+DevToolsCapability --> TestFlow
+DevToolsCapability --> BuildFlow
+PackageMgmtCapability --> ModuleLoadFlow
+
+' 流程到服务的映射
+CodeExecutionFlow --> CLIService
+ModuleLoadFlow --> CLIService
+ToolchainFlow --> FormatService
+ToolchainFlow --> LintService
+TestFlow --> TestService
+BuildFlow --> BuildService
+ModuleLoadFlow --> LSPService
+
+' 服务到利益相关者的映射
+CLIService --> Developer
+LSPService --> IDE
+TestService --> CICD
+BuildService --> CICD
+FormatService --> Developer
+LintService --> Developer
+
+note right of RuntimeCapability
+  提供JavaScript/TypeScript代码
+  执行环境，支持ESM模块系统
+end note
+
+note right of DevToolsCapability
+  提供完整的开发工具链：
+  - 代码格式化
+  - 代码检查
+  - 测试框架
+  - 类型检查
+end note
+
+note right of PackageMgmtCapability
+  支持多种包管理方式：
+  - npm包管理
+  - JSR包注册表
+  - 本地模块
+end note
+
+note right of LSPService
+  提供Language Server Protocol
+  支持IDE集成和代码智能提示
+end note
+
+@enduml
+

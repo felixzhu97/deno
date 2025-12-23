@@ -1,0 +1,136 @@
+@startuml 数据架构视图
+!theme plain
+skinparam componentStyle rectangle
+skinparam linetype ortho
+
+title TOGAF 数据架构视图 - Deno项目
+
+package "数据实体层" {
+  [模块图] as ModuleGraph
+  [依赖关系] as Dependencies
+  [模块元数据] as ModuleMetadata
+  [代码缓存] as CodeCache
+  [模块缓存] as ModuleCache
+  [类型检查缓存] as TypeCheckCache
+  [增量编译缓存] as IncrementalCache
+  [deno.json] as DenoConfig
+  [package.json] as PackageJSON
+  [import_map.json] as ImportMap
+  [tsconfig.json] as TSConfig
+  [JSR注册表] as JSRRegistry
+  [NPM注册表] as NPMRegistry
+  [包元数据] as PackageMetadata
+  [版本信息] as VersionInfo
+  [权限描述符] as PermissionDescriptor
+  [环境变量] as EnvVars
+  [工作区状态] as WorkspaceState
+}
+
+package "数据访问层" {
+  [模块图构建器] as GraphBuilder
+  [缓存管理器] as CacheManager
+  [配置加载器] as ConfigLoader
+  [注册表客户端] as RegistryClient
+  [文件系统访问] as FileSystemAccess
+}
+
+package "数据存储层" {
+  [本地文件系统] as LocalFS
+  [Deno缓存目录] as DenoCacheDir
+  [SQLite数据库] as SQLiteDB
+  [内存缓存] as MemoryCache
+}
+
+package "数据流层" {
+  [模块解析流程] as ModuleResolveFlow
+  [缓存更新流程] as CacheUpdateFlow
+  [配置读取流程] as ConfigReadFlow
+  [包下载流程] as PackageDownloadFlow
+}
+
+' 数据实体关系
+ModuleGraph --> Dependencies
+ModuleGraph --> ModuleMetadata
+CodeCache --> ModuleCache
+CodeCache --> TypeCheckCache
+CodeCache --> IncrementalCache
+JSRRegistry --> PackageMetadata
+NPMRegistry --> PackageMetadata
+PackageMetadata --> VersionInfo
+
+' 数据访问层到数据实体
+GraphBuilder --> ModuleGraph
+GraphBuilder --> Dependencies
+CacheManager --> CodeCache
+CacheManager --> ModuleCache
+CacheManager --> TypeCheckCache
+CacheManager --> IncrementalCache
+ConfigLoader --> DenoConfig
+ConfigLoader --> PackageJSON
+ConfigLoader --> ImportMap
+ConfigLoader --> TSConfig
+RegistryClient --> JSRRegistry
+RegistryClient --> NPMRegistry
+RegistryClient --> PackageMetadata
+
+' 数据访问层到数据存储层
+GraphBuilder --> LocalFS
+CacheManager --> DenoCacheDir
+CacheManager --> SQLiteDB
+CacheManager --> MemoryCache
+ConfigLoader --> LocalFS
+RegistryClient --> LocalFS
+FileSystemAccess --> LocalFS
+
+' 数据流层到数据访问层
+ModuleResolveFlow --> GraphBuilder
+ModuleResolveFlow --> CacheManager
+CacheUpdateFlow --> CacheManager
+ConfigReadFlow --> ConfigLoader
+PackageDownloadFlow --> RegistryClient
+PackageDownloadFlow --> CacheManager
+
+' 数据流关系
+ModuleResolveFlow --> ModuleGraph
+ModuleResolveFlow --> Dependencies
+CacheUpdateFlow --> CodeCache
+CacheUpdateFlow --> ModuleCache
+ConfigReadFlow --> DenoConfig
+ConfigReadFlow --> PackageJSON
+PackageDownloadFlow --> PackageMetadata
+PackageDownloadFlow --> VersionInfo
+
+note right of ModuleGraph
+  位置：cli/cache/module_info.rs
+  存储模块依赖图和元数据
+end note
+
+note right of CodeCache
+  位置：cli/cache/code_cache.rs
+  缓存编译后的代码以提高性能
+end note
+
+note right of DenoCacheDir
+  默认位置：
+  - Linux: ~/.cache/deno
+  - macOS: ~/Library/Caches/deno
+  - Windows: %LOCALAPPDATA%\deno\cache
+end note
+
+note right of SQLiteDB
+  用于存储：
+  - 模块缓存索引
+  - KV存储数据
+  - 其他结构化数据
+end note
+
+note right of ModuleResolveFlow
+  1. 解析模块标识符
+  2. 检查缓存
+  3. 下载（如需要）
+  4. 构建依赖图
+  5. 更新缓存
+end note
+
+@enduml
+
