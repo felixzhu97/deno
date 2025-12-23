@@ -1,0 +1,150 @@
+@startuml Technology Architecture View
+!theme plain
+skinparam componentStyle rectangle
+skinparam linetype ortho
+
+title TOGAF Technology Architecture View - Deno Project
+
+package "Application Technology Layer" {
+  [Deno CLI] as DenoCLI
+  [Deno Runtime] as DenoRuntime
+  [Extension System] as ExtensionSystem
+}
+
+package "Runtime Technology Layer" {
+  [V8 JavaScript Engine] as V8Engine
+  [Rust Runtime] as RustRuntime
+  [Tokio Async Runtime] as TokioRuntime
+  [deno_core] as DenoCore
+}
+
+package "System Interface Layer" {
+  [File System API] as FSAPI
+  [Network API] as NetworkAPI
+  [Process API] as ProcessAPI
+  [Signal Handling] as SignalHandling
+  [Permission System] as PermissionSystem
+  [Sandbox Mechanism] as Sandbox
+  [Resource Isolation] as ResourceIsolation
+}
+
+package "Platform Technology Layer" {
+  [Rust Compiler] as RustCompiler
+  [Cargo Build System] as CargoBuild
+  [LLVM Backend] as LLVMBackend
+  [HTTP Client] as HTTPClient
+  [WebSocket] as WebSocketTech
+  [TLS/SSL] as TLSTech
+  [DNS Resolver] as DNSResolver
+  [SQLite] as SQLiteTech
+  [File System] as FileSystemTech
+  [Memory Management] as MemoryManagement
+}
+
+package "Infrastructure Layer" {
+  [Operating System] as OperatingSystem
+  [Linux] as Linux
+  [macOS] as macOS
+  [Windows] as Windows
+  [Hardware Platform] as HardwarePlatform
+  [x86_64] as x86_64
+  [ARM64] as ARM64
+}
+
+' Application technology layer to runtime technology layer
+DenoCLI --> DenoRuntime
+DenoRuntime --> ExtensionSystem
+DenoRuntime --> V8Engine
+DenoRuntime --> RustRuntime
+RustRuntime --> TokioRuntime
+ExtensionSystem --> DenoCore
+DenoCore --> V8Engine
+
+' Runtime technology layer to system interface layer
+V8Engine --> FSAPI
+V8Engine --> NetworkAPI
+V8Engine --> ProcessAPI
+TokioRuntime --> FSAPI
+TokioRuntime --> NetworkAPI
+TokioRuntime --> ProcessAPI
+ExtensionSystem --> PermissionSystem
+ExtensionSystem --> Sandbox
+ExtensionSystem --> ResourceIsolation
+
+' System interface layer to platform technology layer
+FSAPI --> FileSystemTech
+NetworkAPI --> HTTPClient
+NetworkAPI --> WebSocketTech
+NetworkAPI --> TLSTech
+NetworkAPI --> DNSResolver
+PermissionSystem --> ResourceIsolation
+
+' Platform technology layer to infrastructure layer
+RustCompiler --> OperatingSystem
+CargoBuild --> OperatingSystem
+FileSystemTech --> OperatingSystem
+HTTPClient --> OperatingSystem
+WebSocketTech --> OperatingSystem
+TLSTech --> OperatingSystem
+SQLiteTech --> OperatingSystem
+
+' Operating system to hardware platform
+OperatingSystem --> Linux
+OperatingSystem --> macOS
+OperatingSystem --> Windows
+HardwarePlatform --> x86_64
+HardwarePlatform --> ARM64
+Linux --> HardwarePlatform
+macOS --> HardwarePlatform
+Windows --> HardwarePlatform
+
+' Compilation toolchain relationships
+RustCompiler --> CargoBuild
+CargoBuild --> LLVMBackend
+LLVMBackend --> HardwarePlatform
+
+note right of V8Engine
+  Google V8 JavaScript Engine
+  Responsible for JavaScript/TypeScript code execution
+  Supports ESM, Web standard APIs
+end note
+
+note right of RustRuntime
+  Rust language core runtime
+  Provides type safety and memory safety
+  High-performance systems programming
+end note
+
+note right of TokioRuntime
+  Async I/O runtime
+  Event loop based
+  Supports concurrency and async operations
+end note
+
+note right of ExtensionSystem
+  Ops mechanism: Rust functions exposed to JavaScript
+  Extensions located in ext/ directory
+  Registered via deno_core
+end note
+
+note right of PermissionSystem
+  Fine-grained permission control
+  Supports file, network, environment permissions
+  Deny by default, explicit authorization
+end note
+
+note right of DenoCore
+  deno_core crate
+  Provides V8 bindings and extension mechanism
+  Module loading and resource management
+end note
+
+note right of OperatingSystem
+  Cross-platform support:
+  - Linux (various distributions)
+  - macOS (Intel & Apple Silicon)
+  - Windows (10+)
+end note
+
+@enduml
+

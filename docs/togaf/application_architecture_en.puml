@@ -1,0 +1,149 @@
+@startuml Application Architecture View
+!theme plain
+skinparam componentStyle rectangle
+skinparam linetype ortho
+
+title TOGAF Application Architecture View - Deno Project
+
+package "CLI Application Layer (cli/)" {
+  [Command Line Interface] as CLI
+  [Argument Parser] as ArgsParser
+  [Tools] as Tools
+  [Module Loader] as ModuleLoader
+  [Type Checker] as TypeChecker
+  [LSP Server] as LSPServer
+  [File Fetcher] as FileFetcher
+  [Resolver] as Resolver
+  [Registry Client] as RegistryClient
+}
+
+package "Runtime Layer (runtime/)" {
+  [JavaScript Runtime] as JSRuntime
+  [Worker Manager] as WorkerManager
+  [Permission System] as PermissionSystem
+  [Code Cache] as CodeCache
+  [Snapshot System] as SnapshotSystem
+  [Error Formatter] as ErrorFormatter
+}
+
+package "Extension Layer (ext/)" {
+  [Fetch API] as FetchExt
+  [WebSocket] as WebSocketExt
+  [WebGPU] as WebGPUExt
+  [Canvas] as CanvasExt
+  [WebStorage] as WebStorageExt
+  [File System] as FSExt
+  [Network] as NetExt
+  [HTTP] as HTTPExt
+  [Crypto] as CryptoExt
+  [Process] as ProcessExt
+  [Signals] as SignalsExt
+  [Node.js API] as NodeExt
+  [NAPI] as NAPIExt
+  [KV Store] as KVExt
+  [Cron] as CronExt
+  [FFI] as FFIExt
+}
+
+package "Shared Library Layer (libs/)" {
+  [Config Management] as ConfigLib
+  [Node Resolver] as NodeResolver
+  [NPM Cache] as NPMCache
+  [NPM Installer] as NPMInstaller
+  [Package JSON] as PackageJSON
+  [Resolver Library] as ResolverLib
+}
+
+package "Tool Applications" {
+  [Format Tool] as FmtTool
+  [Lint Tool] as LintTool
+  [Test Tool] as TestTool
+  [Build Tool] as BuildTool
+  [Doc Tool] as DocTool
+  [Package Manager Tool] as PMTool
+}
+
+' CLI layer internal relationships
+CLI --> ArgsParser
+CLI --> Tools
+CLI --> ModuleLoader
+CLI --> TypeChecker
+CLI --> LSPServer
+ModuleLoader --> FileFetcher
+ModuleLoader --> Resolver
+Resolver --> RegistryClient
+
+' CLI to runtime layer
+CLI --> JSRuntime
+ModuleLoader --> JSRuntime
+TypeChecker --> JSRuntime
+
+' Runtime layer internal relationships
+JSRuntime --> WorkerManager
+JSRuntime --> PermissionSystem
+JSRuntime --> CodeCache
+JSRuntime --> SnapshotSystem
+JSRuntime --> ErrorFormatter
+
+' Runtime to extension layer
+JSRuntime --> FetchExt
+JSRuntime --> WebSocketExt
+JSRuntime --> WebGPUExt
+JSRuntime --> CanvasExt
+JSRuntime --> WebStorageExt
+JSRuntime --> FSExt
+JSRuntime --> NetExt
+JSRuntime --> HTTPExt
+JSRuntime --> CryptoExt
+JSRuntime --> ProcessExt
+JSRuntime --> SignalsExt
+JSRuntime --> NodeExt
+JSRuntime --> NAPIExt
+JSRuntime --> KVExt
+JSRuntime --> CronExt
+JSRuntime --> FFIExt
+
+' Extension layer to shared libraries
+NodeExt --> NodeResolver
+NodeExt --> NPMCache
+NodeExt --> NPMInstaller
+NodeExt --> PackageJSON
+Resolver --> ResolverLib
+ModuleLoader --> ConfigLib
+
+' Tools to other layers
+FmtTool --> JSRuntime
+LintTool --> JSRuntime
+TestTool --> JSRuntime
+BuildTool --> JSRuntime
+DocTool --> JSRuntime
+PMTool --> RegistryClient
+PMTool --> NPMInstaller
+
+note right of CLI
+  Entry point: cli/main.rs
+  Handles all command line commands
+end note
+
+note right of JSRuntime
+  Core runtime: runtime/worker.rs
+  Manages JavaScript execution context
+end note
+
+note right of ModuleLoader
+  Module loading: cli/module_loader.rs
+  Handles ESM module resolution and loading
+end note
+
+note right of PermissionSystem
+  Permission control: runtime/permissions/
+  Fine-grained security permission management
+end note
+
+note right of FetchExt
+  All extensions located in ext/ directory
+  Exposed to JavaScript via Ops mechanism
+end note
+
+@enduml
+

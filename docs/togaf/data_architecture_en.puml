@@ -1,0 +1,136 @@
+@startuml Data Architecture View
+!theme plain
+skinparam componentStyle rectangle
+skinparam linetype ortho
+
+title TOGAF Data Architecture View - Deno Project
+
+package "Data Entity Layer" {
+  [Module Graph] as ModuleGraph
+  [Dependencies] as Dependencies
+  [Module Metadata] as ModuleMetadata
+  [Code Cache] as CodeCache
+  [Module Cache] as ModuleCache
+  [Type Check Cache] as TypeCheckCache
+  [Incremental Compile Cache] as IncrementalCache
+  [deno.json] as DenoConfig
+  [package.json] as PackageJSON
+  [import_map.json] as ImportMap
+  [tsconfig.json] as TSConfig
+  [JSR Registry] as JSRRegistry
+  [NPM Registry] as NPMRegistry
+  [Package Metadata] as PackageMetadata
+  [Version Info] as VersionInfo
+  [Permission Descriptor] as PermissionDescriptor
+  [Environment Variables] as EnvVars
+  [Workspace State] as WorkspaceState
+}
+
+package "Data Access Layer" {
+  [Module Graph Builder] as GraphBuilder
+  [Cache Manager] as CacheManager
+  [Config Loader] as ConfigLoader
+  [Registry Client] as RegistryClient
+  [File System Access] as FileSystemAccess
+}
+
+package "Data Storage Layer" {
+  [Local File System] as LocalFS
+  [Deno Cache Directory] as DenoCacheDir
+  [SQLite Database] as SQLiteDB
+  [Memory Cache] as MemoryCache
+}
+
+package "Data Flow Layer" {
+  [Module Resolve Flow] as ModuleResolveFlow
+  [Cache Update Flow] as CacheUpdateFlow
+  [Config Read Flow] as ConfigReadFlow
+  [Package Download Flow] as PackageDownloadFlow
+}
+
+' Data entity relationships
+ModuleGraph --> Dependencies
+ModuleGraph --> ModuleMetadata
+CodeCache --> ModuleCache
+CodeCache --> TypeCheckCache
+CodeCache --> IncrementalCache
+JSRRegistry --> PackageMetadata
+NPMRegistry --> PackageMetadata
+PackageMetadata --> VersionInfo
+
+' Data access layer to data entities
+GraphBuilder --> ModuleGraph
+GraphBuilder --> Dependencies
+CacheManager --> CodeCache
+CacheManager --> ModuleCache
+CacheManager --> TypeCheckCache
+CacheManager --> IncrementalCache
+ConfigLoader --> DenoConfig
+ConfigLoader --> PackageJSON
+ConfigLoader --> ImportMap
+ConfigLoader --> TSConfig
+RegistryClient --> JSRRegistry
+RegistryClient --> NPMRegistry
+RegistryClient --> PackageMetadata
+
+' Data access layer to data storage layer
+GraphBuilder --> LocalFS
+CacheManager --> DenoCacheDir
+CacheManager --> SQLiteDB
+CacheManager --> MemoryCache
+ConfigLoader --> LocalFS
+RegistryClient --> LocalFS
+FileSystemAccess --> LocalFS
+
+' Data flow layer to data access layer
+ModuleResolveFlow --> GraphBuilder
+ModuleResolveFlow --> CacheManager
+CacheUpdateFlow --> CacheManager
+ConfigReadFlow --> ConfigLoader
+PackageDownloadFlow --> RegistryClient
+PackageDownloadFlow --> CacheManager
+
+' Data flow relationships
+ModuleResolveFlow --> ModuleGraph
+ModuleResolveFlow --> Dependencies
+CacheUpdateFlow --> CodeCache
+CacheUpdateFlow --> ModuleCache
+ConfigReadFlow --> DenoConfig
+ConfigReadFlow --> PackageJSON
+PackageDownloadFlow --> PackageMetadata
+PackageDownloadFlow --> VersionInfo
+
+note right of ModuleGraph
+  Location: cli/cache/module_info.rs
+  Stores module dependency graph and metadata
+end note
+
+note right of CodeCache
+  Location: cli/cache/code_cache.rs
+  Caches compiled code for performance
+end note
+
+note right of DenoCacheDir
+  Default locations:
+  - Linux: ~/.cache/deno
+  - macOS: ~/Library/Caches/deno
+  - Windows: %LOCALAPPDATA%\deno\cache
+end note
+
+note right of SQLiteDB
+  Used for storing:
+  - Module cache index
+  - KV store data
+  - Other structured data
+end note
+
+note right of ModuleResolveFlow
+  1. Resolve module identifier
+  2. Check cache
+  3. Download (if needed)
+  4. Build dependency graph
+  5. Update cache
+end note
+
+@enduml
+

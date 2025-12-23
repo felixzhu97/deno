@@ -4,7 +4,21 @@
 
 ## 架构视图说明
 
-本目录包含四个TOGAF标准架构视图，使用PlantUML格式绘制：
+本目录包含四个TOGAF标准架构视图，使用PlantUML格式绘制。每个视图都有中文版和英文版：
+
+**中文版文件：**
+- `business_architecture.puml` - 业务架构视图
+- `application_architecture.puml` - 应用架构视图
+- `data_architecture.puml` - 数据架构视图
+- `technology_architecture.puml` - 技术架构视图
+
+**英文版文件：**
+- `business_architecture_en.puml` - Business Architecture View
+- `application_architecture_en.puml` - Application Architecture View
+- `data_architecture_en.puml` - Data Architecture View
+- `technology_architecture_en.puml` - Technology Architecture View
+
+### 1. 业务架构视图
 
 ### 1. 业务架构视图 (`business_architecture.puml`)
 

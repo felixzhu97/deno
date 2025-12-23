@@ -1,0 +1,89 @@
+@startuml Business Architecture View
+!theme plain
+skinparam componentStyle rectangle
+skinparam linetype ortho
+
+title TOGAF Business Architecture View - Deno Project
+
+package "Business Capability Layer" {
+  [JavaScript/TypeScript Runtime Capability] as RuntimeCapability
+  [Developer Tools Capability] as DevToolsCapability
+  [Package Management Capability] as PackageMgmtCapability
+  [Language Service Capability] as LSPCapability
+}
+
+package "Business Process Layer" {
+  [Code Execution Process] as CodeExecutionFlow
+  [Module Loading Process] as ModuleLoadFlow
+  [Toolchain Process] as ToolchainFlow
+  [Testing Process] as TestFlow
+  [Build Process] as BuildFlow
+}
+
+package "Business Service Layer" {
+  [CLI Service] as CLIService
+  [LSP Service] as LSPService
+  [Test Service] as TestService
+  [Build Service] as BuildService
+  [Format Service] as FormatService
+  [Lint Service] as LintService
+}
+
+package "External Stakeholders" {
+  [Developer] as Developer
+  [IDE/Editor] as IDE
+  [CI/CD System] as CICD
+}
+
+' Business capability to process mapping
+RuntimeCapability --> CodeExecutionFlow
+RuntimeCapability --> ModuleLoadFlow
+DevToolsCapability --> ToolchainFlow
+DevToolsCapability --> TestFlow
+DevToolsCapability --> BuildFlow
+PackageMgmtCapability --> ModuleLoadFlow
+
+' Process to service mapping
+CodeExecutionFlow --> CLIService
+ModuleLoadFlow --> CLIService
+ToolchainFlow --> FormatService
+ToolchainFlow --> LintService
+TestFlow --> TestService
+BuildFlow --> BuildService
+ModuleLoadFlow --> LSPService
+
+' Service to stakeholder mapping
+CLIService --> Developer
+LSPService --> IDE
+TestService --> CICD
+BuildService --> CICD
+FormatService --> Developer
+LintService --> Developer
+
+note right of RuntimeCapability
+  Provides JavaScript/TypeScript code
+  execution environment with ESM module system
+end note
+
+note right of DevToolsCapability
+  Provides complete development toolchain:
+  - Code formatting
+  - Code linting
+  - Test framework
+  - Type checking
+end note
+
+note right of PackageMgmtCapability
+  Supports multiple package management:
+  - npm package management
+  - JSR package registry
+  - Local modules
+end note
+
+note right of LSPService
+  Provides Language Server Protocol
+  Supports IDE integration and code intelligence
+end note
+
+@enduml
+
